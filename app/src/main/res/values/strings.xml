@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Pop Movies</string>
+    <string name="iv_poster_description">A poster from a movie</string>
+</resources>
