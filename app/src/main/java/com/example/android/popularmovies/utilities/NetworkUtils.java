@@ -18,7 +18,7 @@ public final class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
-    //TODO : Add a API Key here in order to get things working
+    //TODO : Add a API Key here in order to get this class working
     private static final String API_KEY = "";
 
     //Allow your user to change sort order via a setting:
@@ -32,8 +32,8 @@ public final class NetworkUtils {
     private static final String MOVIE_PATH_TOP_RATED = "/top_rated";
     private static final String PARAM_API_KEY = "api_key";
 
-    private static final int SORT_BY_POPULARITY = 0;
-    private static final int SORT_BY_RATING = 1;
+    public static final int SORT_BY_POPULARITY = 0;
+    public static final int SORT_BY_RATING = 1;
 
     /**
      * This method defines a java URL object to fetch movies from a choosed sort type
@@ -41,36 +41,33 @@ public final class NetworkUtils {
      * @param sortBy the type of sort (SORT_BY_POPULARITY, SORT_BY_RATING)
      * @return
      */
-    public static URL buildUrl (int sortBy){
+    public static URL buildUrl(int sortBy) {
 
-        String urlChoosed = "";
+        String urlChoosed = MOVIE_BASE_URL + MOVIE_PATH_URL;
 
-        switch(sortBy)
-        {
+        switch (sortBy) {
             case SORT_BY_RATING:
-                urlChoosed = MOVIE_BASE_URL + MOVIE_PATH_URL + MOVIE_PATH_TOP_RATED;
-
+                urlChoosed += MOVIE_PATH_TOP_RATED;
                 break;
 
             case SORT_BY_POPULARITY:
             default:
-                urlChoosed = MOVIE_BASE_URL + MOVIE_PATH_URL + MOVIE_PATH_POPULAR;
+                urlChoosed += MOVIE_PATH_POPULAR;
                 break;
         }
 
         Uri builtUri = Uri.parse(urlChoosed).buildUpon()
-                .appendQueryParameter(PARAM_API_KEY,API_KEY)
+                .appendQueryParameter(PARAM_API_KEY, API_KEY)
                 .build();
 
         URL url = null;
-
         try {
             url = new URL(builtUri.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "built URL: " + url);
+        Log.d(TAG, "Built URL: " + url);
 
         return url;
     }
@@ -83,7 +80,9 @@ public final class NetworkUtils {
      * @throws IOException Related to network and stream reading
      */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
+
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
         try {
             InputStream in = urlConnection.getInputStream();
 

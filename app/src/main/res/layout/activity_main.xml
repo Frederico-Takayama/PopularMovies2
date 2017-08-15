@@ -9,7 +9,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="test"/>
+        android:text="test"
+        android:id="@+id/test_display"/>
 
     <ImageView
         android:layout_width="match_parent"
