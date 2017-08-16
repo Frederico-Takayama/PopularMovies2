@@ -11,6 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
+ * This class helps working with Json results
+ *
  * Created by lsitec335.takayama on 04/08/17.
  */
 

@@ -2,17 +2,16 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.utilities.MoviesJsonUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 
@@ -21,43 +20,40 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    ImageView mImageView;
+    final private int NUMBER_OF_COLLUMNS = 2;
 
-    TextView testDisplay = null;
+    RecyclerView mMoviesRecyclerView;
+    MovieAdapter mMovieAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mImageView = (ImageView) findViewById(R.id.iv_main_poster);
-        Context context = this;
-        mImageView.setVisibility(View.VISIBLE);
+        mMoviesRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
 
-        testDisplay = (TextView) findViewById(R.id.test_display);
+        boolean reverseLayout = false;
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(
+                this, NUMBER_OF_COLLUMNS, LinearLayoutManager.VERTICAL, reverseLayout);
+        mMoviesRecyclerView.setLayoutManager(gridLayoutManager);
 
-        /*Picasso.with(context).setLoggingEnabled(true);
-        //Picasso.with(context).load("http://i.imgur.com/DvpvklR.png").into(imageView);
-        Log.d(this.toString(), "try load a image using Picasso");
-        //Picasso.with(context).load("http://i.imgur.com/yWyBaYk.jpg").into(mImageView);
-        Picasso.with(context).load("http://image.tmdb.org/t/p/w342//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
-                .into(mImageView);*/
+        mMoviesRecyclerView.setHasFixedSize(true);
 
-        URL urlPostersQuery = NetworkUtils.buildUrl(NetworkUtils.SORT_BY_POPULARITY);
+        mMovieAdapter = new MovieAdapter();
 
-        new MoviesQueryTask().execute(urlPostersQuery);
+        mMoviesRecyclerView.setAdapter(mMovieAdapter);
+
+        loadMovies(NetworkUtils.SORT_BY_POPULARITY);
     }
 
-
-    public class MoviesQueryTask extends AsyncTask<URL, Void, String> {
+    private class MoviesQueryTask extends AsyncTask<URL, Void, Movie[]> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            testDisplay.setText("");
         }
 
         @Override
-        protected String doInBackground(URL... urls) {
+        protected Movie[] doInBackground(URL... urls) {
 
             URL url;
             Movie[] movies = null;
@@ -84,19 +80,39 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if (movies != null)
-                        return movies[0].toString();
+                        return movies;
                 }
             }
             return null;
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            if (s != null && !s.equals("")) {
-                testDisplay.setText(s);//just for test
+        protected void onPostExecute(Movie[] movies) {
+            if (movies != null && !movies.equals("")) {
+                mMovieAdapter.setMoviesData(movies);
             }
 
         }
+    }
+
+    /**
+        Calls network to fetch movies by popularity or by average rating
+
+        @param sortedBy: can be NetworkUtils.SORT_BY_POPULARITY or NetworkUtils.SORT_BY_RATING
+                Otherwise, this method is going to be sorted by popularity.
+    */
+    private void loadMovies(int sortedBy){
+
+        URL urlPostersQuery;
+
+        if(sortedBy == NetworkUtils.SORT_BY_POPULARITY || sortedBy == NetworkUtils.SORT_BY_RATING){
+            urlPostersQuery = NetworkUtils.buildUrl(sortedBy);
+        }
+        else{
+            urlPostersQuery = NetworkUtils.buildUrl(NetworkUtils.SORT_BY_POPULARITY);
+        }
+        new MoviesQueryTask().execute(urlPostersQuery);
+
     }
 
 }

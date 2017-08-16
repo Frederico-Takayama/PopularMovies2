@@ -11,6 +11,8 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
+ * This class has some methods to help during network calls
+ *
  * Created by lsitec335.takayama on 03/08/17.
  */
 
