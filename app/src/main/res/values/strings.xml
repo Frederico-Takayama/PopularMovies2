@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Pop Movies</string>
     <string name="iv_poster_description">A poster from a movie</string>
+    <string name="error_message">An error has occurred.\n Please try again later.</string>
+    <string name="sort_by_popularity">Sort by popularity</string>
+    <string name="sort_by_average_rate">Sort by average rate</string>
 </resources>

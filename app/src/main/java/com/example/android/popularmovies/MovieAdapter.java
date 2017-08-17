@@ -12,15 +12,12 @@ import com.example.android.popularmovies.data.Movie;
 import com.squareup.picasso.Picasso;
 
 /**
- * This class generates an Adapter to the RecyclerView
+ * Generates an Adapter to the RecyclerView
  *
  * Created by lsitec335.takayama on 16/08/17.
  */
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder>{
-
-    final private String POSTER_URL_BASE = "http://image.tmdb.org/t/p/";
-    final private String POSTER_SIZE_PATH_URL = "w185"; //w500
 
     private Movie[] mMovies;
 
@@ -47,11 +44,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
 
+        final String POSTER_URL_BASE = "http://image.tmdb.org/t/p/";
+        final String POSTER_SIZE_PATH_URL = "w185";
+
         //debug
         //String posterUrl = "http://image.tmdb.org/t/p/w342//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg";
         String posterUrl = POSTER_URL_BASE + POSTER_SIZE_PATH_URL +
                 mMovies[position].getPosterUrl();
-        Log.d("viewHolder","posterUrl: " + posterUrl);
+        //Log.d("viewHolder","posterUrl: " + posterUrl);
 
         holder.bind(posterUrl);
     }
