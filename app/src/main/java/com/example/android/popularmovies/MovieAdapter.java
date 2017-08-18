@@ -111,15 +111,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         }
 
         void bind(String posterUrl) {
-
             NetworkUtils.setImage(context, posterUrl, mMoviePoster);
-
-//            Picasso.with(context).setLoggingEnabled(true);
-//            Log.d(this.toString(), "try load a image using Picasso");
-//            //example:
-//            // Picasso.with(context).load("http://i.imgur.com/yWyBaYk.jpg").into(mImageView);
-//            Picasso.with(context).load(posterUrl).into(mMoviePoster);
-
         }
     }
 

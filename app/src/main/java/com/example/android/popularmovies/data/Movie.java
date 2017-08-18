@@ -73,13 +73,11 @@ public class Movie implements Serializable {
 
     @Override
     public String toString() {
-        //return super.toString();
-        String movieStr = "Movie:{title:" + getTitle() +
+        return "Movie:{title:" + getTitle() +
                 ",posterUrl:" + getPosterUrl() +
                 ",synopsis:" + getSynopsis() +
                 ",rating:" + getRating() +
                 ",releaseDate:" + getReleaseDate() +
                 "}";
-        return movieStr;
     }
 }
