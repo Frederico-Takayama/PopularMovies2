@@ -1,7 +1,11 @@
 package com.example.android.popularmovies.utilities;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +40,8 @@ public final class NetworkUtils {
 
     public static final int SORT_BY_POPULARITY = 0;
     public static final int SORT_BY_RATING = 1;
+    public static final String POSTER_URL_BASE = "http://image.tmdb.org/t/p/";
+    public static final String POSTER_SIZE_PATH_URL = "w185";
 
     /**
      * This method defines a java URL object to fetch movies from a choosed sort type
@@ -100,6 +106,14 @@ public final class NetworkUtils {
         } finally {
             urlConnection.disconnect();
         }
+    }
+
+    public static void setImage(Context context, String posterUrl, ImageView imageView){
+        Picasso.with(context).setLoggingEnabled(true);
+        Log.d(context.toString(), "try load a image using Picasso");
+        //example:
+        // Picasso.with(context).load("http://i.imgur.com/yWyBaYk.jpg").into(mImageView);
+        Picasso.with(context).load(posterUrl).into(imageView);
     }
 
 }

@@ -7,4 +7,6 @@
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorMenuTextApearance">#FFFFFF</color>
+    <color name="colorTitleDetail">#FFFFFF</color>
+    <color name="colorTitleDetailBackground">#009688</color>
 </resources>

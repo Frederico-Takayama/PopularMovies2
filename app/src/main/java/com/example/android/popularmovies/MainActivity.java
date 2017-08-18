@@ -1,5 +1,6 @@
 package com.example.android.popularmovies;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -24,7 +25,10 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity {
+/**
+ * Main Class. implements MovieAdapter.GridItemClickListener in order to treat click events
+ * */
+public class MainActivity extends AppCompatActivity implements MovieAdapter.GridItemClickListener {
 
     private final String TAG = MainActivity.class.toString();
     RecyclerView mMoviesRecyclerView;
@@ -41,18 +45,34 @@ public class MainActivity extends AppCompatActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         mMoviesRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
 
+        setRecyclerView();
+    }
+
+    /**
+     * Defines recycler view configuration
+     */
+    private void setRecyclerView() {
+
         final boolean reverseLayout = false;
         GridLayoutManager gridLayoutManager = new GridLayoutManager(
                 this, setNumberOfColumns(), LinearLayoutManager.VERTICAL, reverseLayout);
         mMoviesRecyclerView.setLayoutManager(gridLayoutManager);
-
         mMoviesRecyclerView.setHasFixedSize(true);
 
-        mMovieAdapter = new MovieAdapter();
-
+        //this is MainActivity. Passed with method onGridItemclick() below:
+        mMovieAdapter = new MovieAdapter(this);
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
 
         loadMovies(NetworkUtils.SORT_BY_POPULARITY);
+    }
+
+    public void onGridItemClick(int clickedItemIndex){
+        Log.d(TAG, "click item index" + clickedItemIndex);
+
+        Movie movie = mMovieAdapter.getMovie(clickedItemIndex);
+        Intent intent = new Intent(this, MovieDetail.class);
+        intent.putExtra(Movie.class.toString(), movie);
+        startActivity(intent);
     }
 
     /**
@@ -67,11 +87,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *  Handles selected items from menu
-     * */
+     * Handles selected items from menu
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        //I could use this line, but notifyDataSetChanged(); already do the job
+        //mMovieAdapter.setMoviesData(null);
 
         switch (id) {
             case R.id.sort_by_popularity:
@@ -191,9 +213,11 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Movie[] movies) {
             mProgressBar.setVisibility(View.INVISIBLE);
             if (movies != null) {
+                Log.d("Test","cheio!");
                 mMovieAdapter.setMoviesData(movies);
                 showRecyclerView();
             } else {
+                Log.d("Test","vazio");
                 showErrorView();
             }
         }

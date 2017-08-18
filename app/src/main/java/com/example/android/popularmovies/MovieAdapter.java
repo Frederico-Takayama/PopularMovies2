@@ -9,20 +9,29 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 /**
  * Generates an Adapter to the RecyclerView
- *
+ * <p>
  * Created by lsitec335.takayama on 16/08/17.
  */
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder>{
+public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
+    GridItemClickListener mOnClickListener;
     private Movie[] mMovies;
 
-    public MovieAdapter(){
+    public Movie getMovie(int index){
+        return mMovies[index];
+    }
 
+    /**
+     * Receives method within GridItemClickListener to treat on click events
+     */
+    public MovieAdapter(GridItemClickListener listener) {
+        mOnClickListener = listener;
     }
 
     @Override
@@ -39,17 +48,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     /**
-        Binds desired content to viewHolder, according to its position
+     * Binds desired content to viewHolder, according to its position
      */
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
 
-        final String POSTER_URL_BASE = "http://image.tmdb.org/t/p/";
-        final String POSTER_SIZE_PATH_URL = "w185";
-
         //debug
         //String posterUrl = "http://image.tmdb.org/t/p/w342//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg";
-        String posterUrl = POSTER_URL_BASE + POSTER_SIZE_PATH_URL +
+        String posterUrl = NetworkUtils.POSTER_URL_BASE + NetworkUtils.POSTER_SIZE_PATH_URL +
                 mMovies[position].getPosterUrl();
         //Log.d("viewHolder","posterUrl: " + posterUrl);
 
@@ -58,24 +64,31 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     @Override
     public int getItemCount() {
-        if(mMovies != null)
+        if (mMovies != null)
             return mMovies.length;
         else
             return 0;
     }
 
     /**
-        Set new content of movies for MovieAdapter;
+     * Set new content of movies for MovieAdapter;
      */
-    public void setMoviesData(Movie[] movies){
+    public void setMoviesData(Movie[] movies) {
         mMovies = movies;
         notifyDataSetChanged();
     }
 
     /**
+     * Defines a method signature for treat click events
+     */
+    public interface GridItemClickListener {
+        void onGridItemClick(int clickedItemIndex);
+    }
+
+    /**
      * MovieAdapterViewHolder is the inner class ViewHolder for this Adapter
      */
-    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ImageView mMoviePoster;
         Context context;
@@ -84,23 +97,28 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             super(itemView);
 
             mMoviePoster = (ImageView) itemView.findViewById(R.id.iv_poster);
-
             context = itemView.getContext();
-
+            itemView.setOnClickListener(this);//set the OnclickListener event
         }
 
+        /**
+         * Invokes mOnClickListener from adapter class.
+         */
         @Override
         public void onClick(View view) {
-            Log.d(MovieAdapterViewHolder.this.toString(), "youclicked!");
+            int clickedPosition = getAdapterPosition();
+            mOnClickListener.onGridItemClick(clickedPosition);
         }
 
-        void bind(String posterUrl){
+        void bind(String posterUrl) {
 
-            Picasso.with(context).setLoggingEnabled(true);
-            Log.d(this.toString(), "try load a image using Picasso");
-            //example:
-            // Picasso.with(context).load("http://i.imgur.com/yWyBaYk.jpg").into(mImageView);
-            Picasso.with(context).load(posterUrl).into(mMoviePoster);
+            NetworkUtils.setImage(context, posterUrl, mMoviePoster);
+
+//            Picasso.with(context).setLoggingEnabled(true);
+//            Log.d(this.toString(), "try load a image using Picasso");
+//            //example:
+//            // Picasso.with(context).load("http://i.imgur.com/yWyBaYk.jpg").into(mImageView);
+//            Picasso.with(context).load(posterUrl).into(mMoviePoster);
 
         }
     }

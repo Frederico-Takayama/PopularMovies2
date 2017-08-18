@@ -1,6 +1,6 @@
 package com.example.android.popularmovies.data;
 
-import java.util.Date;
+import java.io.Serializable;
 
 /**
  * Class Movie: contains informations about a movie
@@ -14,7 +14,7 @@ import java.util.Date;
  * Created by lsitec335.takayama on 15/08/17.
  */
 
-public class Movie {
+public class Movie implements Serializable {
 
     private String mTitle;
     private String mPosterUrl;
