@@ -1,13 +1,16 @@
 package com.example.android.popularmovies;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.data.Trailler;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 
 import java.net.URL;
@@ -34,11 +37,8 @@ public class MovieDetail extends AppCompatActivity {
         Intent intent = getIntent();
         Movie movie = (Movie) intent.getSerializableExtra(Movie.class.toString());
 
-        //retrieve trailler url information
-        URL urlTraillerQuery = retriveTraillerInformation(movie.getId());
-
-        //retrieve trailler url information
-        URL urlReviewQuery = retriveReviewInformation(movie.getId());
+        loadTraillers(movie.getId());
+        loadReviews(movie.getId());
 
         mTitleTextView.setText(movie.getTitle());
         String year = movie.getReleaseDate().substring(0,
@@ -57,22 +57,42 @@ public class MovieDetail extends AppCompatActivity {
     }
 
     //retrieve trailler url information
-    public URL retriveTraillerInformation(long movie_id){
+    public void loadTraillers(long movie_id){
         URL urlTraillerQuery;
         urlTraillerQuery = NetworkUtils.buildUrlWithParam(
                 NetworkUtils.MOVIE_TRAILLER, movie_id);
         Log.d("trailler", urlTraillerQuery.toString());
-        //new MainActivity.MoviesQueryTask().execute(urlPostersQuery);
-        return urlTraillerQuery;
+
+        //execute out from main thread
+        new TraillerQueryTask().execute(urlTraillerQuery);
     }
 
     //retrieve review url information
-    public URL retriveReviewInformation(long movie_id){
+    public void loadReviews(long movie_id){
         URL urlReviewQuery;
         urlReviewQuery = NetworkUtils.buildUrlWithParam(
                 NetworkUtils.MOVIE_REVIEW, movie_id);
         Log.d("review", urlReviewQuery.toString());
-        //new MainActivity.MoviesQueryTask().execute(urlPostersQuery);
-        return urlReviewQuery;
+
+        //execute out from main thread
+        //new ReviewQueryTask().execute(urlReviewQuery);
+    }
+
+    private class TraillerQueryTask extends AsyncTask<URL, Void, Trailler[]> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Trailler[] doInBackground(URL... urls) {
+            return new Trailler[0];
+        }
+
+        @Override
+        protected void onPostExecute(Trailler[] traillers) {
+            super.onPostExecute(traillers);
+        }
     }
 }
