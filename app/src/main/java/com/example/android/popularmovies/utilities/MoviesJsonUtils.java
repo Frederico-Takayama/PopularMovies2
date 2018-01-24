@@ -68,6 +68,7 @@ public final class MoviesJsonUtils {
 
             JSONObject movieJson = resultsArray.getJSONObject(i);
             movies[i] = new Movie(
+                    movieJson.getLong("id"),
                     movieJson.getString("title"),
                     movieJson.getString("poster_path"),
                     movieJson.getString("overview"),

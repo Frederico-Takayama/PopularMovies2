@@ -36,35 +36,26 @@ public final class NetworkUtils {
     private static final String MOVIE_PATH_URL = "/3/movie";
     private static final String MOVIE_PATH_POPULAR = "/popular";
     private static final String MOVIE_PATH_TOP_RATED = "/top_rated";
+    private static final String MOVIE_PATH_VIDEOS = "/{id}/videos";
+    private static final String MOVIE_PATH_REVIEWS = "/{id}/reviews";
+
     private static final String PARAM_API_KEY = "api_key";
 
     public static final int SORT_BY_POPULARITY = 0;
     public static final int SORT_BY_RATING = 1;
+    public static final int MOVIE_TRAILLER = 2;
+    public static final int MOVIE_REVIEW = 3;
     public static final String POSTER_URL_BASE = "http://image.tmdb.org/t/p/";
     public static final String POSTER_SIZE_PATH_URL = "w185";
 
     /**
-     * This method defines a java URL object to fetch movies from a choosed sort type
+     * This method defines a java URL object from String url
      *
-     * @param sortBy the type of sort (SORT_BY_POPULARITY, SORT_BY_RATING)
+     * @param urlString contains url in String format
      * @return
      */
-    public static URL buildUrl(int sortBy) {
-
-        String urlChoosed = MOVIE_BASE_URL + MOVIE_PATH_URL;
-
-        switch (sortBy) {
-            case SORT_BY_RATING:
-                urlChoosed += MOVIE_PATH_TOP_RATED;
-                break;
-
-            case SORT_BY_POPULARITY:
-            default:
-                urlChoosed += MOVIE_PATH_POPULAR;
-                break;
-        }
-
-        Uri builtUri = Uri.parse(urlChoosed).buildUpon()
+    public static URL buildUrl(String urlString){
+        Uri builtUri = Uri.parse(urlString).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, API_KEY)
                 .build();
 
@@ -78,6 +69,54 @@ public final class NetworkUtils {
         Log.d(TAG, "Built URL: " + url);
 
         return url;
+    }
+
+    /**
+     * This method defines a java URL object which uses some param
+     *
+     * @param param contains the value to be replaced in url path
+     * @return
+     */
+    public static URL buildUrlWithParam(int type, long param){
+        String urlChoosed = MOVIE_BASE_URL + MOVIE_PATH_URL;
+
+        switch (type) {
+            case MOVIE_TRAILLER:
+                urlChoosed += MOVIE_PATH_VIDEOS;
+                break;
+
+            case MOVIE_REVIEW:
+            default:
+                urlChoosed += MOVIE_PATH_REVIEWS;
+                break;
+        }
+
+        urlChoosed = urlChoosed.replace("{id}",Long.toString(param));
+
+        return buildUrl(urlChoosed);
+    }
+
+    /**
+     * This method defines a java URL object to fetch movies from a choosed sort type
+     *
+     * @param sortBy the type of choosen (SORT_BY_POPULARITY, SORT_BY_RATING)
+     * @return
+     */
+    public static URL buildUrlWithFilter(int sortBy) {
+        String urlChoosed = MOVIE_BASE_URL + MOVIE_PATH_URL;
+
+        switch (sortBy) {
+            case SORT_BY_RATING:
+                urlChoosed += MOVIE_PATH_TOP_RATED;
+                break;
+
+            case SORT_BY_POPULARITY:
+            default:
+                urlChoosed += MOVIE_PATH_POPULAR;
+                break;
+        }
+
+        return buildUrl(urlChoosed);
     }
 
     /**

@@ -139,9 +139,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         URL urlPostersQuery;
 
         if (sortedBy == NetworkUtils.SORT_BY_POPULARITY || sortedBy == NetworkUtils.SORT_BY_RATING) {
-            urlPostersQuery = NetworkUtils.buildUrl(sortedBy);
+            urlPostersQuery = NetworkUtils.buildUrlWithFilter(sortedBy);
         } else {
-            urlPostersQuery = NetworkUtils.buildUrl(NetworkUtils.SORT_BY_POPULARITY);
+            urlPostersQuery = NetworkUtils.buildUrlWithFilter(NetworkUtils.SORT_BY_POPULARITY);
         }
         new MoviesQueryTask().execute(urlPostersQuery);
 
@@ -214,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             mProgressBar.setVisibility(View.INVISIBLE);
             if (movies != null) {
                 Log.d("Test","cheio!");
+                Log.d("movies:", movies.toString());
                 mMovieAdapter.setMoviesData(movies);
                 showRecyclerView();
             } else {

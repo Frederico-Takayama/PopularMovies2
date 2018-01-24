@@ -16,20 +16,28 @@ import java.io.Serializable;
 
 public class Movie implements Serializable {
 
+    private long mId;
     private String mTitle;
     private String mPosterUrl;
     private String mSynopsis;
     private double mRating;
     private String mReleaseDate;
 
-    public Movie(String title, String posterUrl, String sysnopsis,
+    public Movie(long id, String title, String posterUrl, String sysnopsis,
                  double rating, String releaseDate) {
+        setId(id);
         setTitle(title);
         setPosterUrl(posterUrl);
         setSynopsis(sysnopsis);
         setRating(rating);
         setReleaseDate(releaseDate);
     }
+
+    public long getId() {
+        return mId;
+    }
+
+    public void setId(long id) { this.mId = id; }
 
     public String getTitle() {
         return mTitle;
@@ -73,7 +81,8 @@ public class Movie implements Serializable {
 
     @Override
     public String toString() {
-        return "Movie:{title:" + getTitle() +
+        return "Movie:{id:" + getId() +
+                ",title:" + getTitle() +
                 ",posterUrl:" + getPosterUrl() +
                 ",synopsis:" + getSynopsis() +
                 ",rating:" + getRating() +
