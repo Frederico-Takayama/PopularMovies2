@@ -10,6 +10,8 @@ import java.io.Serializable;
  * - A plot synopsis (called overview in the api)
  * - user rating (called vote_average in the api)
  * - release date
+ * - reviews
+ * - traillers
  * <p>
  * Created by lsitec335.takayama on 15/08/17.
  */
@@ -22,6 +24,8 @@ public class Movie implements Serializable {
     private String mSynopsis;
     private double mRating;
     private String mReleaseDate;
+    private Review[] reviews;
+    private Trailler[] traillers;
 
     public Movie(long id, String title, String posterUrl, String sysnopsis,
                  double rating, String releaseDate) {
@@ -79,6 +83,14 @@ public class Movie implements Serializable {
         this.mReleaseDate = releaseDate;
     }
 
+    public Review[] getReviews(){ return reviews; }
+
+    public void setReviews(Review[] reviews){ this.reviews = reviews; }
+
+    public Trailler[] getTraillers(){ return traillers; }
+
+    public void setTraillers(Trailler[] traillers){ this.traillers = traillers; }
+
     @Override
     public String toString() {
         return "Movie:{id:" + getId() +
@@ -87,6 +99,8 @@ public class Movie implements Serializable {
                 ",synopsis:" + getSynopsis() +
                 ",rating:" + getRating() +
                 ",releaseDate:" + getReleaseDate() +
+                ",traillers:" + getTraillers() +
+                ",reviews:" + getReviews() +
                 "}";
     }
 }

@@ -47,7 +47,7 @@ public class Trailler implements Serializable {
 
     @Override
     public String toString() {
-        return "Movie:{key:" + getKey() +
+        return "Trailler:{key:" + getKey() +
                 ",name:" + getName() +
                 ",url:" + getUrlString() +
                 "}";

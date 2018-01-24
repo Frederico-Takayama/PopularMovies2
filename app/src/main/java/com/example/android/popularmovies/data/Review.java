@@ -13,7 +13,9 @@ public class Review implements Serializable {
     private String mUrlString;
 
     public Review(String author, String content, String urlString){
-
+        setAuthor(author);
+        setContent(content);
+        setUrlString(urlString);
     }
 
     public String getAuthor(){
@@ -42,7 +44,7 @@ public class Review implements Serializable {
 
     @Override
     public String toString() {
-        return "Movie:{author:" + getAuthor() +
+        return "Review:{author:" + getAuthor() +
                 ",content:" + getContent() +
                 ",url:" + getUrlString() +
                 "}";

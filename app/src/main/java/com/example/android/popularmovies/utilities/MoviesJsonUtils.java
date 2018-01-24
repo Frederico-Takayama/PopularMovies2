@@ -122,10 +122,10 @@ public final class MoviesJsonUtils {
         Trailler[] traillers = new Trailler[resultsArray.length()];
         for (int i = 0; i < resultsArray.length(); i++) {
 
-            JSONObject movieJson = resultsArray.getJSONObject(i);
+            JSONObject traillerJson = resultsArray.getJSONObject(i);
             traillers[i] = new Trailler(
-                    movieJson.getString("key"),
-                    movieJson.getString("name"));
+                    traillerJson.getString("key"),
+                    traillerJson.getString("name"));
 
             Log.d(TAG, traillers[i].toString());
         }
@@ -158,16 +158,16 @@ public final class MoviesJsonUtils {
         }
         */
 
-        JSONObject traillersJson = new JSONObject(reviewsJsonStr);//create a JSON Object
-        JSONArray resultsArray = traillersJson.getJSONArray("results");
+        JSONObject reviewsJson = new JSONObject(reviewsJsonStr);//create a JSON Object
+        JSONArray resultsArray = reviewsJson.getJSONArray("results");
         Review[] reviews = new Review[resultsArray.length()];
         for (int i = 0; i < resultsArray.length(); i++) {
 
-            JSONObject movieJson = resultsArray.getJSONObject(i);
+            JSONObject reviewJson = resultsArray.getJSONObject(i);
             reviews[i] = new Review(
-                    movieJson.getString("author"),
-                    movieJson.getString("content"),
-                    movieJson.getString("url"));
+                    reviewJson.getString("author"),
+                    reviewJson.getString("content"),
+                    reviewJson.getString("url"));
 
             Log.d(TAG, reviews[i].toString());
         }
