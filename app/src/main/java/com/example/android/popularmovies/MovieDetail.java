@@ -66,7 +66,11 @@ public class MovieDetail extends AppCompatActivity
         mReviewRecyclerView = (RecyclerView) findViewById(R.id.rc_reviews);
 
         Intent intent = getIntent();
-        mMovie = (Movie) intent.getSerializableExtra(Movie.class.toString());
+
+        // to use with Serializable classes
+        // mMovie = (Movie) intent.getSerializableExtra(Movie.class.toString());
+        // to use with Parcelable classes
+        mMovie = intent.getParcelableExtra(Movie.class.toString());
 
         mTitleTextView.setText(mMovie.getTitle());
         String year = mMovie.getReleaseDate().substring(0,

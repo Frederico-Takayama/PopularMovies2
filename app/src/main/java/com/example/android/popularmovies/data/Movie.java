@@ -1,5 +1,8 @@
 package com.example.android.popularmovies.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
 /**
@@ -16,7 +19,7 @@ import java.io.Serializable;
  * Created by lsitec335.takayama on 15/08/17.
  */
 
-public class Movie implements Serializable {
+public class Movie implements Parcelable {
 
     private long mId;
     private String mTitle;
@@ -24,8 +27,8 @@ public class Movie implements Serializable {
     private String mSynopsis;
     private double mRating;
     private String mReleaseDate;
-    private Review[] reviews;
-    private Trailler[] traillers;
+    private Review[] mReviews;
+    private Trailler[] mTraillers;
 
     public Movie(long id, String title, String posterUrl, String sysnopsis,
                  double rating, String releaseDate) {
@@ -83,13 +86,13 @@ public class Movie implements Serializable {
         this.mReleaseDate = releaseDate;
     }
 
-    public Review[] getReviews(){ return reviews; }
+    public Review[] getReviews(){ return mReviews; }
 
-    public void setReviews(Review[] reviews){ this.reviews = reviews; }
+    public void setReviews(Review[] reviews){ this.mReviews = reviews; }
 
-    public Trailler[] getTraillers(){ return traillers; }
+    public Trailler[] getTraillers(){ return mTraillers; }
 
-    public void setTraillers(Trailler[] traillers){ this.traillers = traillers; }
+    public void setTraillers(Trailler[] traillers){ this.mTraillers = traillers; }
 
     @Override
     public String toString() {
@@ -102,5 +105,46 @@ public class Movie implements Serializable {
                 ",traillers:" + getTraillers() +
                 ",reviews:" + getReviews() +
                 "}";
+    }
+
+    //methods below exists to implement Parcelable interface
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeLong(mId);
+        parcel.writeString(mTitle);
+        parcel.writeString(mPosterUrl);
+        parcel.writeString(mSynopsis);
+        parcel.writeDouble(mRating);
+        parcel.writeString(mReleaseDate);
+        parcel.writeTypedArray(mReviews, 0);
+        parcel.writeTypedArray(mTraillers, 0);
+    }
+
+    public static final Parcelable.Creator<Movie> CREATOR
+            = new Parcelable.Creator<Movie>() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    //constructor for Parcelable
+    private Movie(Parcel in) {
+        mId = in.readLong();
+        mTitle = in.readString();
+        mPosterUrl = in.readString();
+        mSynopsis = in.readString();
+        mRating = in.readDouble();
+        mReleaseDate = in.readString();
+        mReviews = in.createTypedArray(Review.CREATOR);
+        mTraillers = in.createTypedArray(Trailler.CREATOR);
     }
 }

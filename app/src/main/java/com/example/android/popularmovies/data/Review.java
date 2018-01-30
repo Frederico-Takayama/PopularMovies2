@@ -1,12 +1,15 @@
 package com.example.android.popularmovies.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
 /**
  * Created by lsitec335.takayama on 24/01/18.
  */
 
-public class Review implements Serializable {
+public class Review implements Serializable, Parcelable {
 
     private String mAuthor;
     private String mContent;
@@ -48,5 +51,36 @@ public class Review implements Serializable {
                 ",content:" + getContent() +
                 ",url:" + getUrlString() +
                 "}";
+    }
+
+    //methods below exists to implement Parcelable interface
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(mAuthor);
+        parcel.writeString(mContent);
+        parcel.writeString(mUrlString);
+    }
+
+    public static final Parcelable.Creator<Review> CREATOR
+            = new Parcelable.Creator<Review>() {
+        public Review createFromParcel(Parcel in) {
+            return new Review(in);
+        }
+
+        public Review[] newArray(int size) {
+            return new Review[size];
+        }
+    };
+
+    //constructor for Parcelable
+    private Review(Parcel in) {
+        mAuthor = in.readString();
+        mContent = in.readString();
+        mUrlString = in.readString();
     }
 }

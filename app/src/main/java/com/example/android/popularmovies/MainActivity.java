@@ -3,6 +3,9 @@ package com.example.android.popularmovies;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,10 +34,14 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity implements MovieAdapter.GridItemClickListener {
 
     private final String TAG = MainActivity.class.toString();
-    RecyclerView mMoviesRecyclerView;
-    MovieAdapter mMovieAdapter;
-    TextView mErrorView;
-    ProgressBar mProgressBar;
+    private static final String MOVIES_FETCHED= "movies_fetched";
+    private static final String SCROLL_POSITION= "scroll_position";
+
+    private RecyclerView mMoviesRecyclerView;
+    private MovieAdapter mMovieAdapter;
+    private TextView mErrorView;
+    private ProgressBar mProgressBar;
+    private static Movie[] mMovies; // saves movies list temporally
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +53,31 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         mMoviesRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
 
         setRecyclerView();
+
+//        if (savedInstanceState != null && savedInstanceState.containsKey(MOVIES_FETCHED)) {
+//            mMovies = (Movie[]) savedInstanceState.getParcelableArray(MOVIES_FETCHED);
+//        }
+
+        if(mMovies != null){
+            mMovieAdapter.setMoviesData(mMovies);
+        }
+        else{
+            loadMovies(NetworkUtils.SORT_BY_POPULARITY);
+        }
+
     }
+
+    //Didn't used at end.. using private static Movie[] mMovies instead
+    //so I could maintaing actual movies list even if I change from detail activity
+    //back to main activity.
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        //saves movies list
+//        if(mMovies!=null){
+//            outState.putParcelableArray(MOVIES_FETCHED, mMovies);
+//        }
+//    }
 
     /**
      * Defines recycler view configuration
@@ -62,8 +93,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         //this is MainActivity. Passed with method onGridItemclick() below:
         mMovieAdapter = new MovieAdapter(this);
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
-
-        loadMovies(NetworkUtils.SORT_BY_POPULARITY);
     }
 
     public void onGridItemClick(int clickedItemIndex){
@@ -94,13 +123,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         int id = item.getItemId();
         //I could use this line, but notifyDataSetChanged(); already do the job
         //mMovieAdapter.setMoviesData(null);
+        mMoviesRecyclerView.smoothScrollToPosition(0); // reset position
 
         switch (id) {
             case R.id.sort_by_popularity:
                 Log.d(TAG, "Selecionar pela popularidade");
                 loadMovies(NetworkUtils.SORT_BY_POPULARITY);
                 break;
-            case R.id.sort_by_average_rate:
+            case R.id.sort_by_highest_rate:
                 Log.d(TAG, "Selecionar pelo rating");
                 loadMovies(NetworkUtils.SORT_BY_RATING);
                 break;
@@ -215,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             if (movies != null) {
                 Log.d("Test","cheio!");
                 Log.d("movies:", movies.toString());
+                mMovies = movies;//updates moviesList var
                 mMovieAdapter.setMoviesData(movies);
                 showRecyclerView();
             } else {
