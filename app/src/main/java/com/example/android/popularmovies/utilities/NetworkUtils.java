@@ -25,7 +25,7 @@ public final class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     //TODO : Add a API Key here in order to get this class working
-    private static final String API_KEY = "";
+    private static final String API_KEY = "09af6c80a9c0eca870dcf593a727c2be";
 
     //Allow your user to change sort order via a setting:
     //The sort order can be by most popular, or by top rated

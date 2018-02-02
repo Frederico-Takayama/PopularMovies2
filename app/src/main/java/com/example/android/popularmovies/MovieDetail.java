@@ -1,11 +1,13 @@
 package com.example.android.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,8 +15,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.data.PopularMoviesContract;
+import com.example.android.popularmovies.data.PopularMoviesDBHelper;
 import com.example.android.popularmovies.data.Review;
 import com.example.android.popularmovies.data.Trailler;
 import com.example.android.popularmovies.utilities.MoviesJsonUtils;
@@ -25,8 +30,13 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.URL;
 
+import static com.example.android.popularmovies.data.Movie.FAVORITE_OFF;
+import static com.example.android.popularmovies.data.Movie.FAVORITE_ON;
+
 public class MovieDetail extends AppCompatActivity
         implements TraillerAdapter.GridItemClickListener, ReviewAdapter.GridItemClickListener{
+
+    private SQLiteDatabase mDb; // to use Database
 
     private final String TAG = MovieDetail.class.toString();
 
@@ -45,6 +55,8 @@ public class MovieDetail extends AppCompatActivity
     private TextView mReviewErrorView;
     private RecyclerView mReviewRecyclerView;
     private ReviewAdapter mReviewAdapter;
+    private ImageView mStartImageView;
+    private boolean isFavorite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +68,7 @@ public class MovieDetail extends AppCompatActivity
         mRatingTextView = (TextView) findViewById(R.id.tv_rating);
         mSynopsisTextView = (TextView) findViewById(R.id.tv_synopsis);
         mPosterImageView = (ImageView) findViewById(R.id.iv_poster);
+        mStartImageView = (ImageView) findViewById(R.id.iv_start);
 
         mTraillerProgressBar = (ProgressBar) findViewById(R.id.pb_trailler_loading_indicator);
         mTraillerErrorView = (TextView) findViewById(R.id.tv_trailler_error_display);
@@ -86,7 +99,20 @@ public class MovieDetail extends AppCompatActivity
 
         NetworkUtils.setImage(this, posterUrl, mPosterImageView);
 
-        setRecyclerViews();
+        setRecyclerViews(); // inflates traillers and reviews lists;
+
+        //using database
+        PopularMoviesDBHelper dbHelper = new PopularMoviesDBHelper(this);
+        mDb = dbHelper.getWritableDatabase();
+
+        //check if this Movie is a favorite one;
+        isFavorite = hasMovieInDb(mMovie.getId());
+
+        if(isFavorite) {
+            mStartImageView.setImageResource(android.R.drawable.btn_star_big_on);
+        } else {
+            mStartImageView.setImageResource(android.R.drawable.btn_star_big_off);
+        }
     }
 
     /**
@@ -200,6 +226,86 @@ public class MovieDetail extends AppCompatActivity
                 Log.d(MovieDetail.class.toString(),"invalid errorView");
                 break;
         }
+    }
+
+    /**
+      * handler for btn_favorites. Set this movie as favorite movie
+      */
+    public void setFavoriteMovie(View view) {
+        isFavorite = !isFavorite;
+
+        if(isFavorite) {
+            mStartImageView.setImageResource(android.R.drawable.btn_star_big_on);
+            long res = addNewMovie(mMovie);
+            if(res>0)
+                Toast.makeText(this, R.string.movie_saved, Toast.LENGTH_SHORT).show();
+            else
+                Log.d(TAG, "movie not saved! It wasn't already saved?"); // debug
+        } else {
+            mStartImageView.setImageResource(android.R.drawable.btn_star_big_off);
+            removeMovie(mMovie);
+        }
+    }
+
+    /**
+     * Insert a movie in Data base
+     * */
+    public long addNewMovie(Movie movie){
+//        movie.setIsFavorite(FAVORITE_ON);
+
+        ContentValues cv = new ContentValues();
+        cv.put(PopularMoviesContract.Movies.COLUMN_MOVIE_ID, movie.getId());
+        cv.put(PopularMoviesContract.Movies.COLUMN_TITLE, movie.getTitle());
+        cv.put(PopularMoviesContract.Movies.COLUMN_POSTER_URL, movie.getPosterUrl());
+        cv.put(PopularMoviesContract.Movies.COLUMN_RELEASE_DATE, movie.getReleaseDate());
+        cv.put(PopularMoviesContract.Movies.COLUMN_RATING, movie.getRating());
+        cv.put(PopularMoviesContract.Movies.COLUMN_SYNOPSIS, movie.getSynopsis());
+//        cv.put(PopularMoviesContract.Movies.COLUMN_IS_FAVORITE, movie.getIsFavorite());
+
+        return mDb.insert(PopularMoviesContract.Movies.TABLE_NAME, null, cv);
+    }
+
+    /**
+     * Insert a movie in Data base
+     * */
+    public void removeMovie(Movie movie){
+//        movie.setIsFavorite(FAVORITE_OFF);
+        long movie_id = movie.getId();
+
+        int res = mDb.delete(PopularMoviesContract.Movies.TABLE_NAME,
+                PopularMoviesContract.Movies.COLUMN_MOVIE_ID + "=" + movie_id, null);
+
+        if(res>0)
+            Toast.makeText(this, R.string.movie_removed, Toast.LENGTH_SHORT).show();
+        else
+            Log.d(TAG,"error during remove movie from db!!!!!!");
+    }
+
+    /**
+     * Check whether has Movie in Data base. If has, then it's a favorite Movie
+     * */
+    public boolean hasMovieInDb(long movie_id){
+        boolean res = false;
+
+        String whereClause = PopularMoviesContract.Movies.COLUMN_MOVIE_ID + " = ?";
+        String[] selectionArgs = new String[1];
+        selectionArgs[0] = String.valueOf(movie_id);
+
+        Cursor cursor = mDb.query(
+                PopularMoviesContract.Movies.TABLE_NAME,
+                null, // columns
+                whereClause, // selection
+                selectionArgs, // selection args
+                null,
+                null,
+                null); // last param is sorted by
+
+        if(cursor != null){
+            res = cursor.getCount() > 0;
+            cursor.close();
+        }
+
+        return res;
     }
 
     private class TraillerQueryTask extends AsyncTask<URL, Void, Trailler[]> {

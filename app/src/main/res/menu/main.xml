@@ -11,9 +11,15 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/sort_by_average_rate"
+        android:id="@+id/sort_by_highest_rate"
         android:orderInCategory="2"
         app:showAsAction="never"
-        android:title="@string/sort_by_average_rating" />
+        android:title="@string/sort_by_highest_rating" />
+
+    <item
+        android:id="@+id/sort_by_favorites"
+        android:orderInCategory="3"
+        app:showAsAction="never"
+        android:title="@string/sort_by_favorites" />
 
 </menu>

@@ -1,6 +1,8 @@
 package com.example.android.popularmovies;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -18,8 +20,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.popularmovies.data.Movie;
+import com.example.android.popularmovies.data.PopularMoviesContract;
+import com.example.android.popularmovies.data.PopularMoviesDBHelper;
 import com.example.android.popularmovies.utilities.MoviesJsonUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 
@@ -33,15 +38,17 @@ import java.net.URL;
  * */
 public class MainActivity extends AppCompatActivity implements MovieAdapter.GridItemClickListener {
 
+    private SQLiteDatabase mDb; // to use Database
+
     private final String TAG = MainActivity.class.toString();
-    private static final String MOVIES_FETCHED= "movies_fetched";
-    private static final String SCROLL_POSITION= "scroll_position";
+//    private static final String MOVIES_FETCHED= "movies_fetched";
 
     private RecyclerView mMoviesRecyclerView;
     private MovieAdapter mMovieAdapter;
     private TextView mErrorView;
     private ProgressBar mProgressBar;
     private static Movie[] mMovies; // saves movies list temporally
+    private static boolean isErrorViewVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +65,85 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 //            mMovies = (Movie[]) savedInstanceState.getParcelableArray(MOVIES_FETCHED);
 //        }
 
+        //TODO: talvez tenha que mudar isto!!
         if(mMovies != null){
-            mMovieAdapter.setMoviesData(mMovies);
+            // enter here during a device rotation
+            if(isErrorViewVisible)
+                showErrorView();
+            else
+                mMovieAdapter.setMoviesData(mMovies);
         }
         else{
             loadMovies(NetworkUtils.SORT_BY_POPULARITY);
         }
 
+        //using database
+        PopularMoviesDBHelper dbHelper = new PopularMoviesDBHelper(this);
+        mDb = dbHelper.getWritableDatabase();
     }
+
+    private Cursor getAllMovies(){
+        return mDb.query(
+                PopularMoviesContract.Movies.TABLE_NAME,
+                null, // projection array (array of columns interested
+                null,
+                null,
+                null,
+                null,
+                PopularMoviesContract.Movies.COLUMN_TITLE); // last param is sorted by
+    }
+
+    /**
+     * This method do a parser in a cursor in current position to a Movie
+     */
+    Movie parseMovie(Cursor cursor)
+    {
+        Movie movie = null;
+
+        try
+        {
+            int idIndex = cursor.getColumnIndexOrThrow(PopularMoviesContract.Movies.COLUMN_MOVIE_ID);
+            int titleIndex = cursor.getColumnIndexOrThrow(PopularMoviesContract.Movies.COLUMN_TITLE);
+            int posterUrlIndex = cursor.getColumnIndexOrThrow(PopularMoviesContract.Movies.COLUMN_POSTER_URL);
+            int sysnopsisIndex = cursor.getColumnIndexOrThrow(PopularMoviesContract.Movies.COLUMN_SYNOPSIS);
+            int ratingIndex = cursor.getColumnIndexOrThrow(PopularMoviesContract.Movies.COLUMN_RATING);
+            int releaseDateIndex = cursor.getColumnIndexOrThrow(PopularMoviesContract.Movies.COLUMN_RELEASE_DATE);
+//            int isFavoriteIndex = cursor.getColumnIndexOrThrow(PopularMoviesContract.Movies.COLUMN_IS_FAVORITE);
+            long id = cursor.getLong(idIndex);
+            String title = cursor.getString(titleIndex);
+            String posterUrl = cursor.getString(posterUrlIndex);
+            String sysnopsis = cursor.getString(sysnopsisIndex);
+            Double rating = cursor.getDouble(ratingIndex);
+            String releaseDate = cursor.getString(releaseDateIndex);
+//            Integer isFavorite = cursor.getInt(isFavoriteIndex);
+            movie = new Movie(id, title, posterUrl, sysnopsis, rating, releaseDate);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return movie;
+    }
+
+    /**
+     * This method uses parseMovie() to do a parser from Cursor to Movie[]
+     * */
+    Movie[] populateMovies(Cursor cursor){
+        if(cursor ==null || cursor.getCount() == 0)
+            return null;
+
+        Movie[] movies = new Movie[cursor.getCount()];
+
+        cursor.moveToFirst();
+        for(int i = 0; i < cursor.getCount(); i++){
+            Movie movie = parseMovie(cursor);
+            movies[i] = movie;
+            cursor.moveToNext();
+        }
+
+        return movies;
+    }
+
 
     //Didn't used at end.. using private static Movie[] mMovies instead
     //so I could maintaing actual movies list even if I change from detail activity
@@ -121,18 +199,22 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        //I could use this line, but notifyDataSetChanged(); already do the job
+        //I could use this line below, but notifyDataSetChanged(); already do the job
         //mMovieAdapter.setMoviesData(null);
-        mMoviesRecyclerView.smoothScrollToPosition(0); // reset position
+        mMoviesRecyclerView.smoothScrollToPosition(0); // resets position
 
         switch (id) {
             case R.id.sort_by_popularity:
-                Log.d(TAG, "Selecionar pela popularidade");
+                Log.d(TAG, "Select by popularity");
                 loadMovies(NetworkUtils.SORT_BY_POPULARITY);
                 break;
             case R.id.sort_by_highest_rate:
-                Log.d(TAG, "Selecionar pelo rating");
+                Log.d(TAG, "Select by rating");
                 loadMovies(NetworkUtils.SORT_BY_RATING);
+                break;
+            case R.id.sort_by_favorites:
+                Log.d(TAG, "Select by favorites");
+                loadMoviesFromDB();
                 break;
             default:
                 Log.d(TAG, "Invalid option");
@@ -148,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     private void showErrorView() {
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
+        isErrorViewVisible = true;
     }
 
     /**
@@ -156,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     private void showRecyclerView() {
         mErrorView.setVisibility(View.INVISIBLE);
         mMoviesRecyclerView.setVisibility(View.VISIBLE);
+        isErrorViewVisible = false;
     }
 
     /**
@@ -175,6 +259,30 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         }
         new MoviesQueryTask().execute(urlPostersQuery);
 
+    }
+
+    /**
+     * retrieves movies from DB
+     * */
+    private void loadMoviesFromDB(){
+        Cursor cursor = getAllMovies();
+        Movie[] movies = populateMovies(cursor);
+        cursor.close(); // close this cursor in order to avoid memory leak;
+
+        if(movies != null){
+            mMovies = movies;
+            mMovieAdapter.setMoviesData(movies);
+            showRecyclerView();
+            // debug
+//            for(Movie movie : movies){
+//                Log.d("movies_from_db", movie.toString());
+//            }
+        }else{
+//            Log.d("movies_from_db", "empty");
+            Toast.makeText(this, R.string.favorites_empty, Toast.LENGTH_SHORT).show();
+        }
+        mMovies = movies;
+        mMovieAdapter.setMoviesData(movies);
     }
 
     /**
@@ -243,13 +351,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         protected void onPostExecute(Movie[] movies) {
             mProgressBar.setVisibility(View.INVISIBLE);
             if (movies != null) {
-                Log.d("Test","cheio!");
-                Log.d("movies:", movies.toString());
+                Log.d("Test","full!");
                 mMovies = movies;//updates moviesList var
                 mMovieAdapter.setMoviesData(movies);
                 showRecyclerView();
             } else {
-                Log.d("Test","vazio");
+                Log.d("Test","empty");
                 showErrorView();
             }
         }

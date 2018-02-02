@@ -29,6 +29,10 @@ public class Movie implements Parcelable {
     private String mReleaseDate;
     private Review[] mReviews;
     private Trailler[] mTraillers;
+//    private Integer isFavorite;
+
+    public static final int FAVORITE_ON = 1;
+    public static final int FAVORITE_OFF = 0;
 
     public Movie(long id, String title, String posterUrl, String sysnopsis,
                  double rating, String releaseDate) {
@@ -38,7 +42,19 @@ public class Movie implements Parcelable {
         setSynopsis(sysnopsis);
         setRating(rating);
         setReleaseDate(releaseDate);
+//        setIsFavorite(FAVORITE_OFF);
     }
+
+//    public Movie(long id, String title, String posterUrl, String sysnopsis,
+//                 double rating, String releaseDate, Integer isFavorite) {
+//        setId(id);
+//        setTitle(title);
+//        setPosterUrl(posterUrl);
+//        setSynopsis(sysnopsis);
+//        setRating(rating);
+//        setReleaseDate(releaseDate);
+//        setIsFavorite(isFavorite);
+//    }
 
     public long getId() {
         return mId;
@@ -94,6 +110,10 @@ public class Movie implements Parcelable {
 
     public void setTraillers(Trailler[] traillers){ this.mTraillers = traillers; }
 
+//    public Integer getIsFavorite(){ return isFavorite; }
+
+//    public void setIsFavorite(Integer isFavorite){ this.isFavorite = isFavorite; }
+
     @Override
     public String toString() {
         return "Movie:{id:" + getId() +
@@ -104,11 +124,12 @@ public class Movie implements Parcelable {
                 ",releaseDate:" + getReleaseDate() +
                 ",traillers:" + getTraillers() +
                 ",reviews:" + getReviews() +
+//                ",isFavorite:" + getIsFavorite() +
                 "}";
     }
 
     //methods below exists to implement Parcelable interface
-    @Override
+//    @Override
     public int describeContents() {
         return 0;
     }
@@ -123,6 +144,7 @@ public class Movie implements Parcelable {
         parcel.writeString(mReleaseDate);
         parcel.writeTypedArray(mReviews, 0);
         parcel.writeTypedArray(mTraillers, 0);
+//        parcel.writeInt(isFavorite);
     }
 
     public static final Parcelable.Creator<Movie> CREATOR
@@ -146,5 +168,6 @@ public class Movie implements Parcelable {
         mReleaseDate = in.readString();
         mReviews = in.createTypedArray(Review.CREATOR);
         mTraillers = in.createTypedArray(Trailler.CREATOR);
+//        isFavorite = in.readInt();
     }
 }

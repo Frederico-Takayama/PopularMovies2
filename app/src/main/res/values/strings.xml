@@ -3,7 +3,8 @@
     <string name="iv_poster_description">A poster from a movie</string>
     <string name="error_message">An error has occurred.\n Please try again later.</string>
     <string name="sort_by_popularity">Sort by popularity</string>
-    <string name="sort_by_average_rating">Sort by average rating</string>
+    <string name="sort_by_highest_rating">Sort by highest rating</string>
+    <string name="sort_by_favorites">Sort by favorites</string>
     <string name="star_off">star off</string>
     <string name="movie_poster">movie poster</string>
     <string name="traillers_title">Traillers:</string>
@@ -13,4 +14,9 @@
     <string name="comments">Comments:</string>
     <string name="url">URL:</string>
     <string name="author_field">Author: %1$s</string>
+    <string name="mark_as_favorites">Mark as Favorites</string>
+    <string name="favorites_status">favorites status</string>
+    <string name="favorites_empty">favorites empty</string>
+    <string name="movie_saved">Movie saved</string>
+    <string name="movie_removed">Movie removed</string>
 </resources>
