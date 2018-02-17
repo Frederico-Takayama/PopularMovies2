@@ -1,14 +1,11 @@
 package com.example.android.popularmovies;
-
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.example.android.popularmovies.data.Trailler;
 
 /**
@@ -17,9 +14,10 @@ import com.example.android.popularmovies.data.Trailler;
  * Created by lsitec335.takayama on 29/01/18.
  */
 
+@SuppressWarnings("ConstantConditions")
 public class TraillerAdapter extends RecyclerView.Adapter<TraillerAdapter.TraillerAdapterViewHolder>{
 
-    GridItemClickListener mOnClickListener;
+    private GridItemClickListener mOnClickListener;
 
     /**
      * Defines a method signature for treat click events
@@ -63,9 +61,8 @@ public class TraillerAdapter extends RecyclerView.Adapter<TraillerAdapter.Traill
         int layoutIdForGridItem = R.layout.trailler_grid_item;
 
         View view = inflater.inflate(layoutIdForGridItem, parent, shouldAttachToParentImmediately);
-        TraillerAdapterViewHolder viewHolder = new TraillerAdapterViewHolder(view);
 
-        return viewHolder;
+        return new TraillerAdapterViewHolder(view);
     }
 
     /**

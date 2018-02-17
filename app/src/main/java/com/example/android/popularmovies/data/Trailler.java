@@ -28,7 +28,7 @@ public class Trailler implements Serializable, Parcelable {
         return mkey;
     }
 
-    public void setKey(String key) {
+    private void setKey(String key) {
         this.mkey = key;
     }
 
@@ -36,7 +36,7 @@ public class Trailler implements Serializable, Parcelable {
         return mName;
     }
 
-    public void setName(String Name) {
+    private void setName(String Name) {
         this.mName = Name;
     }
 
@@ -44,7 +44,7 @@ public class Trailler implements Serializable, Parcelable {
         return mUrlString;
     }
 
-    public void setUrl(){
+    private void setUrl(){
         this.mUrlString = Trailler.YOUTUBE_BASE_URL+Trailler.YOUTUBE_PATH_URL+getKey();
     }
 

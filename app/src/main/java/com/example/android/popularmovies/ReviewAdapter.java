@@ -1,9 +1,7 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +13,10 @@ import com.example.android.popularmovies.data.Review;
  * Created by lsitec335.takayama on 29/01/18.
  */
 
+@SuppressWarnings("ConstantConditions")
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdapterViewHolder>{
 
-    GridItemClickListener mOnClickListener;
+    private GridItemClickListener mOnClickListener;
 
     /**
      * Defines a method signature for treat click events
@@ -61,9 +60,8 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdap
         int layoutIdForGridItem = R.layout.review_grid_item;
 
         View view = inflater.inflate(layoutIdForGridItem, parent, shouldAttachToParentImmediately);
-        ReviewAdapterViewHolder viewHolder = new ReviewAdapterViewHolder(view);
 
-        return viewHolder;
+        return  new ReviewAdapterViewHolder(view);
     }
 
     /**
@@ -101,6 +99,9 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdap
             mContentTextView = (TextView) itemView.findViewById(R.id.review_content);
             mUrlTextView = (TextView) itemView.findViewById(R.id.review_url);
             context = itemView.getContext();
+
+            //attach an external handler from Adapter into this viewHolder
+            itemView.setOnClickListener(this);//set the OnclickListener event
         }
 
         /**

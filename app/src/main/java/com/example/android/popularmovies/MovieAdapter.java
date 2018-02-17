@@ -2,7 +2,6 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,6 @@ import android.widget.ImageView;
 
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
-import com.squareup.picasso.Picasso;
 
 /**
  * Generates an Adapter to the RecyclerView
@@ -18,9 +16,10 @@ import com.squareup.picasso.Picasso;
  * Created by lsitec335.takayama on 16/08/17.
  */
 
+@SuppressWarnings("ConstantConditions")
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
-    GridItemClickListener mOnClickListener;
+    private GridItemClickListener mOnClickListener;
     private Movie[] mMovies;
 
     public Movie getMovie(int index){
@@ -42,9 +41,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         int layoutIdForGridItem = R.layout.movie_grid_item;
 
         View view = inflater.inflate(layoutIdForGridItem, parent, shouldAttachToParentImmediately);
-        MovieAdapterViewHolder viewHolder = new MovieAdapterViewHolder(view);
 
-        return viewHolder;
+        return  new MovieAdapterViewHolder(view);
     }
 
     /**

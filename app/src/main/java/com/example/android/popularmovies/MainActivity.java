@@ -2,12 +2,10 @@ package com.example.android.popularmovies;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,7 +22,6 @@ import android.widget.Toast;
 
 import com.example.android.popularmovies.data.Movie;
 import com.example.android.popularmovies.data.PopularMoviesContract;
-import com.example.android.popularmovies.data.PopularMoviesDBHelper;
 import com.example.android.popularmovies.utilities.MoviesJsonUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 
@@ -33,14 +30,18 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.URL;
 
+import static com.example.android.popularmovies.utilities.NetworkUtils.SORT_BY_FAVORITE;
+import static com.example.android.popularmovies.utilities.NetworkUtils.SORT_BY_POPULARITY;
+import static com.example.android.popularmovies.utilities.NetworkUtils.SORT_BY_RATING;
+
 /**
  * Main Class. implements MovieAdapter.GridItemClickListener in order to treat click events
  * */
-public class MainActivity extends AppCompatActivity implements MovieAdapter.GridItemClickListener {
-
-    private SQLiteDatabase mDb; // to use Database
+public class MainActivity extends AppCompatActivity implements
+        MovieAdapter.GridItemClickListener, LoaderManager.LoaderCallbacks<Cursor>{
 
     private final String TAG = MainActivity.class.toString();
+    private static final int MOVIES_LOADER_ID = 0;
 //    private static final String MOVIES_FETCHED= "movies_fetched";
 
     private RecyclerView mMoviesRecyclerView;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     private ProgressBar mProgressBar;
     private static Movie[] mMovies; // saves movies list temporally
     private static boolean isErrorViewVisible = false;
+    private static int mSortType = SORT_BY_POPULARITY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,38 +67,37 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 //            mMovies = (Movie[]) savedInstanceState.getParcelableArray(MOVIES_FETCHED);
 //        }
 
-        //TODO: talvez tenha que mudar isto!!
         if(mMovies != null){
             // enter here during a device rotation
             if(isErrorViewVisible)
                 showErrorView();
             else
-                mMovieAdapter.setMoviesData(mMovies);
+                if(mSortType != SORT_BY_FAVORITE)
+                    mMovieAdapter.setMoviesData(mMovies);
         }
         else{
-            loadMovies(NetworkUtils.SORT_BY_POPULARITY);
+            loadMovies(SORT_BY_POPULARITY);
         }
-
-        //using database
-        PopularMoviesDBHelper dbHelper = new PopularMoviesDBHelper(this);
-        mDb = dbHelper.getWritableDatabase();
     }
 
-    private Cursor getAllMovies(){
-        return mDb.query(
-                PopularMoviesContract.Movies.TABLE_NAME,
-                null, // projection array (array of columns interested
-                null,
-                null,
-                null,
-                null,
-                PopularMoviesContract.Movies.COLUMN_TITLE); // last param is sorted by
+    /**
+     * This method is called after this activity has been paused or restarted.
+     * Often, this is after new data has been inserted through an AddTaskActivity,
+     * so this restarts the loader to re-query the underlying data for any changes.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // re-query only when is sorted by favorite movies
+        if(mSortType == SORT_BY_FAVORITE)
+            getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
     }
 
     /**
      * This method do a parser in a cursor in current position to a Movie
      */
-    Movie parseMovie(Cursor cursor)
+    private Movie parseMovie(Cursor cursor)
     {
         Movie movie = null;
 
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     /**
      * This method uses parseMovie() to do a parser from Cursor to Movie[]
      * */
-    Movie[] populateMovies(Cursor cursor){
+    private Movie[] populateMovies(Cursor cursor){
         if(cursor ==null || cursor.getCount() == 0)
             return null;
 
@@ -205,14 +206,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         switch (id) {
             case R.id.sort_by_popularity:
+                mSortType = SORT_BY_POPULARITY;
                 Log.d(TAG, "Select by popularity");
-                loadMovies(NetworkUtils.SORT_BY_POPULARITY);
+                loadMovies(SORT_BY_POPULARITY);
                 break;
             case R.id.sort_by_highest_rate:
+                mSortType = SORT_BY_RATING;
                 Log.d(TAG, "Select by rating");
-                loadMovies(NetworkUtils.SORT_BY_RATING);
+                loadMovies(SORT_BY_RATING);
                 break;
             case R.id.sort_by_favorites:
+                mSortType = SORT_BY_FAVORITE;
                 Log.d(TAG, "Select by favorites");
                 loadMoviesFromDB();
                 break;
@@ -252,10 +256,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         URL urlPostersQuery;
 
-        if (sortedBy == NetworkUtils.SORT_BY_POPULARITY || sortedBy == NetworkUtils.SORT_BY_RATING) {
+        if (sortedBy == SORT_BY_POPULARITY || sortedBy == SORT_BY_RATING) {
             urlPostersQuery = NetworkUtils.buildUrlWithFilter(sortedBy);
         } else {
-            urlPostersQuery = NetworkUtils.buildUrlWithFilter(NetworkUtils.SORT_BY_POPULARITY);
+            urlPostersQuery = NetworkUtils.buildUrlWithFilter(SORT_BY_POPULARITY);
         }
         new MoviesQueryTask().execute(urlPostersQuery);
 
@@ -263,26 +267,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
     /**
      * retrieves movies from DB
+     *
+     * call asyncTaskLoader to run in another thread
      * */
     private void loadMoviesFromDB(){
-        Cursor cursor = getAllMovies();
-        Movie[] movies = populateMovies(cursor);
-        cursor.close(); // close this cursor in order to avoid memory leak;
-
-        if(movies != null){
-            mMovies = movies;
-            mMovieAdapter.setMoviesData(movies);
-            showRecyclerView();
-            // debug
-//            for(Movie movie : movies){
-//                Log.d("movies_from_db", movie.toString());
-//            }
-        }else{
-//            Log.d("movies_from_db", "empty");
-            Toast.makeText(this, R.string.favorites_empty, Toast.LENGTH_SHORT).show();
-        }
-        mMovies = movies;
-        mMovieAdapter.setMoviesData(movies);
+        getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, this);
     }
 
     /**
@@ -304,6 +293,85 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         //px = dp*(dpi/160)
         return (int) ((width / (dpi / 160)) / posterSizeDp);
+    }
+
+    /**
+     * This method implements AsyncTaskLoader for database
+     * */
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        return new android.support.v4.content.AsyncTaskLoader<Cursor>(this) {
+
+            // Initialize a Cursor, this will hold all the task data
+            Cursor mMoviesData = null;
+
+            // onStartLoading() is called when a loader first starts loading data
+            @Override
+            protected void onStartLoading() {
+                if (mMoviesData != null) {
+                    // Delivers any previously loaded data immediately
+                    deliverResult(mMoviesData);
+                } else {
+                    // Force a new load
+                    forceLoad();
+                }
+            }
+
+            // loadInBackground() performs asynchronous loading of data
+            @Override
+            public Cursor loadInBackground() {
+                // Will implement to load data
+
+                try {
+                    return getContentResolver().query(
+                            PopularMoviesContract.Movies.CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            PopularMoviesContract.Movies.COLUMN_TITLE);
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to asynchronously load data.");
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            // deliverResult sends the result of the load, a Cursor, to the registered listener
+            public void deliverResult(Cursor data) {
+                mMoviesData = data;
+                super.deliverResult(data);
+            }
+        };
+
+    }
+
+    /**
+     * This method implements AsyncTaskLoader for database
+     * */
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Movie[] movies = populateMovies(data);
+        data.close(); // close this cursor in order to avoid memory leak;
+
+        if(movies != null){
+            mMovies = movies;
+            mMovieAdapter.setMoviesData(movies);
+            showRecyclerView();
+        }else{
+            Toast.makeText(this, R.string.favorites_empty, Toast.LENGTH_SHORT).show();
+        }
+        mMovies = movies;
+        mMovieAdapter.setMoviesData(movies);
+    }
+
+    /**
+     * This method implements AsyncTaskLoader for database
+     * */
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMovieAdapter.setMoviesData(null);
     }
 
     private class MoviesQueryTask extends AsyncTask<URL, Void, Movie[]> {

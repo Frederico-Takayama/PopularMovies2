@@ -3,8 +3,6 @@ package com.example.android.popularmovies.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
-
 /**
  * Class Movie: contains informations about a movie
  * <p>
@@ -66,7 +64,7 @@ public class Movie implements Parcelable {
         return mTitle;
     }
 
-    public void setTitle(String title) {
+    private void setTitle(String title) {
         this.mTitle = title;
     }
 
@@ -74,7 +72,7 @@ public class Movie implements Parcelable {
         return mPosterUrl;
     }
 
-    public void setPosterUrl(String posterUrl) {
+    private void setPosterUrl(String posterUrl) {
         this.mPosterUrl = posterUrl;
     }
 
@@ -82,7 +80,7 @@ public class Movie implements Parcelable {
         return mSynopsis;
     }
 
-    public void setSynopsis(String synopsis) {
+    private void setSynopsis(String synopsis) {
         this.mSynopsis = synopsis;
     }
 
@@ -90,7 +88,7 @@ public class Movie implements Parcelable {
         return mRating;
     }
 
-    public void setRating(double rating) {
+    private void setRating(double rating) {
         this.mRating = rating;
     }
 
@@ -98,7 +96,7 @@ public class Movie implements Parcelable {
         return mReleaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
+    private void setReleaseDate(String releaseDate) {
         this.mReleaseDate = releaseDate;
     }
 

@@ -25,7 +25,7 @@ public class Review implements Serializable, Parcelable {
         return mAuthor;
     }
 
-    public void setAuthor(String author){
+    private void setAuthor(String author){
         this.mAuthor = author;
     }
 
@@ -33,7 +33,7 @@ public class Review implements Serializable, Parcelable {
         return mContent;
     }
 
-    public void setContent(String content){
+    private void setContent(String content){
         this.mContent = content;
     }
 
@@ -41,7 +41,7 @@ public class Review implements Serializable, Parcelable {
         return mUrlString;
     }
 
-    public void setUrlString(String urlString){
+    private void setUrlString(String urlString){
         this.mUrlString = urlString;
     }
 

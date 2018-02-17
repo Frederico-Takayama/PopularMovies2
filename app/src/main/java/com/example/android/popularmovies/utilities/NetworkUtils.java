@@ -25,7 +25,7 @@ public final class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     //TODO : Add a API Key here in order to get this class working
-    private static final String API_KEY = "09af6c80a9c0eca870dcf593a727c2be";
+    private static final String API_KEY = "";
 
     //Allow your user to change sort order via a setting:
     //The sort order can be by most popular, or by top rated
@@ -44,6 +44,7 @@ public final class NetworkUtils {
     public static final int SORT_BY_POPULARITY = 0;
     public static final int SORT_BY_RATING = 1;
     public static final int MOVIE_TRAILLER = 2;
+    public static final int SORT_BY_FAVORITE = 3;
     public static final int MOVIE_REVIEW = 3;
     public static final String POSTER_URL_BASE = "http://image.tmdb.org/t/p/";
     public static final String POSTER_SIZE_PATH_URL = "w185";
@@ -52,9 +53,9 @@ public final class NetworkUtils {
      * This method defines a java URL object from String url
      *
      * @param urlString contains url in String format
-     * @return
+     * @return URL
      */
-    public static URL buildUrl(String urlString){
+    private static URL buildUrl(String urlString){
         Uri builtUri = Uri.parse(urlString).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, API_KEY)
                 .build();
@@ -75,7 +76,7 @@ public final class NetworkUtils {
      * This method defines a java URL object which uses some param
      *
      * @param param contains the value to be replaced in url path
-     * @return
+     * @return URL
      */
     public static URL buildUrlWithParam(int type, long param){
         String urlChoosed = MOVIE_BASE_URL + MOVIE_PATH_URL;
@@ -100,7 +101,7 @@ public final class NetworkUtils {
      * This method defines a java URL object to fetch movies from a choosed sort type
      *
      * @param sortBy the type of choosen (SORT_BY_POPULARITY, SORT_BY_RATING)
-     * @return
+     * @return URL
      */
     public static URL buildUrlWithFilter(int sortBy) {
         String urlChoosed = MOVIE_BASE_URL + MOVIE_PATH_URL;
